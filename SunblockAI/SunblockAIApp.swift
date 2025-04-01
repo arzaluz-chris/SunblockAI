@@ -1,10 +1,4 @@
-//
-//  SunblockAIApp.swift
-//  SunblockAI
-//
-//  Created by Christian Arzaluz on 31/03/25.
-//
-
+// SunblockAIApp.swift
 import SwiftUI
 
 @main
