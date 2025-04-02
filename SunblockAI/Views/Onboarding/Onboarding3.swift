@@ -4,69 +4,133 @@ import SwiftUI
 struct Onboarding3: View {
     @Binding var currentPage: Int
     @ObservedObject var userViewModel: UserViewModel
+    @State private var skipTimeSelection = false
     
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            // Título
-            Text("Cuéntanos sobre tus hábitos")
-                .font(.largeTitle.bold())
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            // Explicación
-            Text("Estos datos nos ayudarán a personalizar tus alertas y recomendaciones.")
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 10)
-            
-            // Grupo de entorno diario
-            VStack(alignment: .leading, spacing: 16) {
-                Text("¿Dónde pasas la mayor parte del día?")
-                    .font(.headline)
-                
-                ForEach(DailyEnvironment.allCases) { environment in
-                    EnvironmentButton(
-                        environment: environment,
-                        isSelected: userViewModel.userSettings.dailyEnvironment == environment,
-                        action: {
-                            userViewModel.userSettings.dailyEnvironment = environment
+        VStack(spacing: 20) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Título
+                    Text("Cuéntanos sobre tus hábitos")
+                        .font(.title2.bold())
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 20)
+                        .padding(.horizontal, 20)
+                    
+                    // Descripción
+                    Text("Estos datos nos ayudarán a personalizar tus alertas y recomendaciones.")
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
+                    
+                    // Grupo de entorno diario
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("¿Dónde pasas la mayor parte del día?")
+                            .font(.headline)
+                        
+                        ForEach(DailyEnvironment.allCases) { environment in
+                            EnvironmentButton(
+                                environment: environment,
+                                isSelected: userViewModel.userSettings.dailyEnvironment == environment,
+                                action: {
+                                    userViewModel.userSettings.dailyEnvironment = environment
+                                    // Actualizar skipTimeSelection automáticamente si selecciona "En casa"
+                                    skipTimeSelection = environment == .home
+                                }
+                            )
                         }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: Color.gray.opacity(0.1), radius: 5)
                     )
+                    .padding(.horizontal)
+                    
+                    // SECCIÓN DE HORA DE EXPOSICIÓN - Adaptada según el entorno seleccionado
+                    if !skipTimeSelection {
+                        // Título adaptado según el contexto
+                        HStack {
+                            let titleText = userViewModel.userSettings.dailyEnvironment == .outdoor
+                                ? "¿A qué hora sueles estar al aire libre?"
+                                : "¿A qué hora te expones más al sol?"
+                            
+                            Text(titleText)
+                                .font(.headline)
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal, 30)
+                        .padding(.top, 10)
+                        
+                        // DATEPICKER
+                        VStack {
+                            DatePicker("", selection: $userViewModel.userSettings.commuteTime, displayedComponents: .hourAndMinute)
+                                .labelsHidden()
+                                .datePickerStyle(WheelDatePickerStyle())
+                                .frame(height: 180)
+                                .padding(.horizontal)
+                        }
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: Color.gray.opacity(0.1), radius: 5)
+                        )
+                        .padding(.horizontal)
+                        
+                        // Botón para omitir esta sección
+                        Button(action: {
+                            skipTimeSelection = true
+                        }) {
+                            Text("No aplica a mi rutina")
+                                .font(.subheadline)
+                                .foregroundColor(.blue)
+                        }
+                        .padding(.top, 5)
+                    } else {
+                        // Mensaje cuando se omite la sección de tiempo
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Text("Horario de exposición solar")
+                                    .font(.headline)
+                                Spacer()
+                            }
+                            
+                            Text("Has indicado que pasas la mayor parte del día en casa o que este horario no aplica a tu rutina. Calcularemos tus recomendaciones basadas en otros factores.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            // Botón para mostrar la sección si el usuario cambia de opinión
+                            Button(action: {
+                                skipTimeSelection = false
+                            }) {
+                                Text("Definir un horario de todas formas")
+                                    .font(.subheadline)
+                                    .foregroundColor(.blue)
+                            }
+                            .padding(.top, 5)
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemBackground))
+                                .shadow(color: Color.gray.opacity(0.1), radius: 5)
+                        )
+                        .padding(.horizontal)
+                    }
+                    
+                    // Espacio ajustable
+                    Spacer(minLength: 10)
                 }
+                .padding(.vertical, 10)
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.gray.opacity(0.1), radius: 5)
-            )
-            .padding(.horizontal)
             
-            // Selector de hora de traslado
-            VStack(alignment: .leading, spacing: 16) {
-                Text("¿A qué hora te trasladas?")
-                    .font(.headline)
-                
-                DatePicker("Hora de traslado", selection: $userViewModel.userSettings.commuteTime, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                    .datePickerStyle(WheelDatePickerStyle())
-                    .frame(maxHeight: 120)
-            }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.gray.opacity(0.1), radius: 5)
-            )
-            .padding(.horizontal)
-            
-            Spacer()
-            
-            // Botones de navegación
+            // Botones de navegación colocados fuera del ScrollView
             HStack(spacing: 16) {
                 // Botón atrás
                 Button(action: {
@@ -102,7 +166,6 @@ struct Onboarding3: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
         }
-        .padding()
     }
 }
 

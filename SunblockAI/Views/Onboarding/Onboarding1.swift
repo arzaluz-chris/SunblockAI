@@ -5,29 +5,31 @@ struct Onboarding1: View {
     @Binding var currentPage: Int
     
     var body: some View {
-        VStack(spacing: 30) {
+        VStack(spacing: 20) {
             Spacer()
             
             // Imagen ilustrativa
             Image(systemName: "sun.max.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 120, height: 120)
+                .frame(width: 100, height: 100)
                 .foregroundColor(.orange)
-                .padding(.bottom, 20)
+                .padding(.bottom, 10)
             
             // Título
             Text("Bienvenido a SunblockAI")
-                .font(.largeTitle.bold())
+                .font(.title.bold())
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
-            // Descripción
-            Text("Te ayudaremos a proteger tu piel del sol con recomendaciones personalizadas basadas en tu tipo de piel, ubicación y el índice UV.")
+            // Descripción con texto actualizado y mejor ajuste
+            Text("Te ayudaremos a proteger tu piel del sol con recomendaciones personalizadas, basadas en tu tipo de piel, así como tus actividades y tu ubicación geográfica.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
-                .padding(.horizontal, 32)
+                .fixedSize(horizontal: false, vertical: true) // Fuerza a que el texto se muestre completo
+                .padding(.horizontal, 24)
+                .padding(.vertical, 10)
             
             Spacer()
             
@@ -51,4 +53,3 @@ struct Onboarding1: View {
         .padding()
     }
 }
-
